@@ -23,7 +23,7 @@ async function command(req, res, commands){
             if(dato[1]){
                 var TweetSeleccionado = dato[1];
                 var usuario = req.user.sub;
-
+                
                 Publicacion.findOne({"usuarioslike.usuariolike": usuario},(error, encontrado)=>{
                     if(error) return res.status(200).send({message: error});
                     if(encontrado){
@@ -85,7 +85,7 @@ async function command(req, res, commands){
                             if (error) return res.status(404).send({ message: "Error en la peticion de Usuario" })
                             if (!retweetEliminado) return res.status(500).send({ message: "El tweet no se ha encontrado en la base de datos" })
                             return res.status(200).send({message:"Retweet Eliminado", retweetEliminado })
-                        })
+                        }).select('-contadores').select('-seguidos')
                         User.findByIdAndUpdate(usuario,{$inc:{"contadores.cantidadRetweets":-1}}, { new: true },(error,retweetEliminadoContador)=>{
                             if (error) return console.log("Error al ingresar like en el contador");
                             if (retweetEliminadoContador) return console.log("Retweet Eliminado con exito");
@@ -95,7 +95,7 @@ async function command(req, res, commands){
                             if (error) return res.status(404).send({ message: "Error en la peticion de Usuario" })
                             if (!retweet) return res.status(500).send({ message: "El tweet no se ha encontrado en la base de datos" })
                             return res.status(200).send({message:"Retweet realizado con exito", retweet })
-                        })
+                        }).select('-contadores').select('-seguidos')
                         User.findByIdAndUpdate(usuario,{$inc:{"contadores.cantidadRetweets":1}}, { new: true },(error,retweetAgregadoContador)=>{
                             if (error) return console.log("Error al ingresar like en el contador");
                             if (retweetAgregadoContador) return console.log("Retweet Agragada con exito");
@@ -254,8 +254,8 @@ async function command(req, res, commands){
                         if (!usuarioEncontrado || nombreDeUsuario == usuarioId) {
                             return res.status(404).send({ message: "El usuario ingresado no existe" })
                         }else{
-                            User.findByIdAndUpdate(usuarioId, { $addToSet: { seguidos: { usuarioSeguido: usuarioId, usuario: nombreDeusuario } } }, { new: true }, (error,usuarioSeguido) => {
-                                return res.status(200).send({ message: "Follow ingresado con éxito", usuarioSeguido })
+                            User.findByIdAndUpdate(usuarioId, { $addToSet: { seguidos: { usuarioSeguido: usuarioEncontrado.id} } }, { new: true }, (error,usuarioSeguidoo) => {
+                                return res.status(200).send({ message: "Follow ingresado con éxito", usuarioSeguidoo })
                             })
                         }
                     })
